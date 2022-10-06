@@ -3,7 +3,8 @@ The scripts used to generate plugin catalog for Cloudbees CI running in an air g
 
 ## Scenario
 
-These scripts are developed for the Cloudbees CI administrators who have to manage and maintaining the CloudBees CI in a "pure" air gapped environment. Here "pure" means that not only the CloudBees CI product itself running on the network isolated infrastructures, but the CloudBees CI administrators have to work with computers without Internet access (e.g. they can only download the software and updates pushed by specific team from an internal file server).  
+These scripts are developed for the Cloudbees CI administrators who have to manage and maintaining the CloudBees CI in a "pure" air gapped environment. Here "pure" means that not only the CloudBees CI product itself running on the network isolated infrastructures, but the CloudBees CI administrators have to work with computers without Internet access (e.g. they can only download the software and updates pushed by specific team from an internal file server). 
+
 The reason that these scripts are needed mainly because the BeeKeeper can only manage the tier1 and tier2 plugins in an air gapped environment, and we usually recommand the Cloudbees CI users manage the tier3 plugins through plugin catalog and proxy artifactory repositary, which have no dependency calculation capabilities by default.  
 
 In this case, the CloudBees CI users could use these scripts to generate the plugin catalog file in either json or yaml formats which contains the tier3 plugins as well as their dependency plugins as a calculation result, which could be used for jenkins cli or CASC bundles respectively.
@@ -69,10 +70,8 @@ A folder with name "script-2.319.3.4" will be created with all files downloaded 
 
 3. Download the folder "script-2.319.3.4" from your internal file server, copy the modified plugins.yaml file into it, and execute the local_run_json.sh or local_run_yaml.sh: 
 
-'./local_run_json.sh -r "https://10.10.10.10/plugins"
+'./local_run_json.sh -r "https://10.10.10.10/plugins'
 or 
-'./local_run_yaml.sh -r "https://10.10.10.10/plugins"
+'./local_run_yaml.sh -r "https://10.10.10.10/plugins'
 
 You need to specify the url of your proxy artifactory repository (e.g. Nexus) with -r parameter. 
-
-
