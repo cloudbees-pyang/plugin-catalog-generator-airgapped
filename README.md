@@ -3,75 +3,76 @@ The scripts used to generate plugin catalog for Cloudbees CI running in an air g
 
 ## Scenario
 
-These scripts are developed for the Cloudbees CI administrators who have to manage and maintaining the CloudBees CI in a "real" air gapped environment. Here "real" means that not only the CloudBees CI product itself running on the network isolated infrastructures, but the CloudBees CI administrators have to work with computers without Internet access (e.g. they can only download the software and updates pushed by specific team from an internal file server).  
+These scripts are developed for the Cloudbees CI administrators who have to manage and maintaining the CloudBees CI in a "pure" air gapped environment. Here "pure" means that not only the CloudBees CI product itself running on the network isolated infrastructures, but the CloudBees CI administrators have to work with computers without Internet access (e.g. they can only download the software and updates pushed by specific team from an internal file server).  
 The reason that these scripts are needed mainly because the BeeKeeper can only manage the tier1 and tier2 plugins in an air gapped environment, and we usually recommand the Cloudbees CI users manage the tier3 plugins through plugin catalog and proxy artifactory repositary, which have no dependency calculation capabilities by default.  
 
-In this case, the CloudBees CI users could use these scripts to generate the plugin catalog file in both json and yaml formats which contains the tier3 plugins as well as their dependency plugins as a calculation result.
+In this case, the CloudBees CI users could use these scripts to generate the plugin catalog file in either json or yaml formats which contains the tier3 plugins as well as their dependency plugins as a calculation result, which could be used for jenkins cli or CASC bundles respectively.
+
+The main idea is: 
 
 Give this script a path to a `plugins.yaml` file in a bundle with all plugins you want installed (any tier), and it will:
 
-1. Generate the `plugin-catalog.yaml` file for you in the same directory, including all versions and transitive dependencies.
-2. Update the `plugins.yaml` file you originally specifed with the additional transitive dependencies.
+1. Based on the version of controller, a preparing script could download all of the files needed for dependency calculation and put them in a folder and pushed into users' internal file server
+2. The CloudBees CI administrator could download this folder from file server, specify the controller's plugins.yaml file and proxy artifactory repository as parameter, which will execute the script and generate the `plugin-catalog.json` file or 'plugin-catalog.yaml' for you in the same directory, including all versions and transitive dependencies.
 
 This means that as long as you are willing to use the plugin versions in the CloudBees Update Centers (which you should be doing), then all you ever need to do is add plugins to the `plugins.yaml` file and this script will handle the rest. No more manually crafting plugin catalogs!
 
 ## Requirements
 
 * docker
-* yq (v4)
 * curl
+* JDK 11
 
 ## Usage
 
+1. prepare_env.sh (need Internet connection)
+
 ```
-Usage: run.sh -v <CI_VERSION> [-f <path/to/plugins.yaml>] [-h] [-x]
+Usage: ${0##*/} -v <CI_VERSION> [-h]
 
     -h          display this help and exit
-    -f FILE     path to the plugins.yaml file
-    -v          The version of CloudBees CI (e.g. 2.263.4.2)
-    -x          Do NOT do an inplace update of plugins.yaml
+    -v          the version of the CloudBees CI controller
+```
+
+2.local_run_json.sh or local_run_yaml.sh (run in air gapped environment)
+
+```
+Usage: ${0##*/} -v <CI_VERSION> -r <LOCAL_ARTIFACTORY_URL> [-h] [-x]
+    
+    -h          display this help and exit
+    -f FILE     path to the plugins.yaml file 
+    -p          path to the plugin management tool lib
+    -w          path to the jenkins.war file
+    -u          the FULL path to the update_center.json file
+    -e          the FULL path to the experiemental update_center.json file
+    -i          the FULL path to the plugin-versions.json file
+    -v          the version of the CloudBees CI controller
+    -r          the url of local proxy artifactory repository
 ```
 
 ## Examples
 
-A single run with the plugins.yaml file in the same directory as `run.sh`. This create `plugin-catalog.yaml` and updates `plugins.yaml`:
+For example, if you want to install two tier 3 plugins with id "plugin-1" and "plugin-2" in your controller with version 2.319.3.4. This is what you need to do
 
-`./run.sh -v 2.263.4.2`
+1. In a connected environment, run "prepare_env.sh" to prepare a folder with all necessary files to generate the plugin catalog file:
 
-A single run with a specified path to plugins.yaml file, but using the `-x` option to turn off the "inplace update". This leave the `plugins.yaml` file alone and only output the `plugin-catalog.yaml` content to stdout.
+'./prepare_env.sh -v 2.319.3.4' 
 
-`./run.sh -v 2.263.4.2 -f /path/to/plugins.yaml -x`
+A folder with name "script-2.319.3.4" will be created with all files downloaded for next step. Then this folder could be packaged and upload into your internal file server in some way.
 
-Multiple runs taking advantage of caching and generating multiple different `plugin-catalogs.yaml` and updating their corresponding `plugins.yaml`:
+2. Export the plugins.yaml file from your controller, and append the plugins that you want to install in this file:
 
-``` bash
-./run.sh -v 2.263.1.2 -f /bundle1/plugins.yaml
-./run.sh -v 2.263.4.2 -f /bundle2/plugins.yaml
-./run.sh -v 2.263.4.2 -f /bundle3/plugins.yaml
-./run.sh -v 2.277.1.2 -f /bundle4/plugins.yaml
-```
+' ......
+- id: plugin-1
+- id: plugin-2
+'
 
-## Notes
+3. Download the folder "script-2.319.3.4" from your internal file server, copy the modified plugins.yaml file into it, and execute the local_run_json.sh or local_run_yaml.sh: 
 
-* This will update your `plugins.yaml` file unless you specify the `-x` flag.
+'./local_run_json.sh -r "https://10.10.10.10/plugins"
+or 
+'./local_run_yaml.sh -r "https://10.10.10.10/plugins"
 
-* This process caches all resources that it fetches under a `.cache` directory in the pwd. It caches multiple versions of the artifacts to enable re-running with different CI_VERSION.
-  * `jenkins.war` from the docker image
-  * `jenkins-plugin-manager.jar` download from github releases
-  * `update-center.json` is cached from the UC download (this can reduce network traffic and delay if wanting to run this subseqently against multiple different `plugins.yaml`s.
+You need to specify the url of your proxy artifactory repository (e.g. Nexus) with -r parameter. 
 
-## Advanced
 
-These two settings are adjustable by exporting them in the shell prior to running. This, for example, is running the process again the client master UC and docker image. *Note that caching does not handle changing this on subseqent runs!*
-
-```bash
-export CB_UPDATE_CENTER="https://jenkins-updates.cloudbees.com/update-center/envelope-core-cm"
-export CB_DOCKER_IMAGE="cloudbees/cloudbees-core-cm"
-```
-
-## TODO
-
-- [x] Generate the updated `plugins.yaml` file that includes the additional transitive dependencies.
-- [x] Put in some examples
-- [x] Consider parameterizing the CI_VERSION. This would require checking the version of the war/UC that is cached and potentially invalidating those artifacts prior to running.
-- [ ] Put time into a PR for PIMT that allows it to have structured output to avoid the use of `sed` in processing its output.
