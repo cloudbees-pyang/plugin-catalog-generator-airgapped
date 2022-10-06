@@ -55,7 +55,7 @@ Usage: ${0##*/} -v <CI_VERSION> -r <LOCAL_ARTIFACTORY_URL> [-h] [-x]
 
 For example, if you want to install two tier 3 plugins with id "plugin-1" and "plugin-2" in your controller with version 2.319.3.4. This is what you need to do
 
-1. In a connected environment, run "prepare_env.sh" to prepare a folder with all necessary files to generate the plugin catalog file:
+1. In a connected environment, run "prepare_env.sh" to prepare a folder, this folder will contain all necessary files to generate the plugin catalog file:
 
 './prepare_env.sh -v 2.319.3.4' 
 
