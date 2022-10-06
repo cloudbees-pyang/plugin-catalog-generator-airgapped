@@ -59,7 +59,7 @@ For example, if you want to install two tier 3 plugins with id "plugin-1" and "p
 
 './prepare_env.sh -v 2.319.3.4' 
 
-A folder with name "script-2.319.3.4" will be created with all files downloaded for next step. Then this folder could be packaged and upload into your internal file server in some way.
+A folder with name "script_2.319.3.4" will be created with all files downloaded for next step. Then this folder could be packaged and upload into your internal file server in some way.
 
 2. Export the plugins.yaml file from your controller, and append the plugins that you want to install in this file:
 
@@ -68,7 +68,7 @@ A folder with name "script-2.319.3.4" will be created with all files downloaded 
 - id: plugin-2
 '
 
-3. Download the folder "script-2.319.3.4" from your internal file server, copy the modified plugins.yaml file into it, and execute the local_run_json.sh or local_run_yaml.sh: 
+3. Download the folder "script_2.319.3.4" from your internal file server, copy the modified plugins.yaml file into it, and execute the local_run_json.sh or local_run_yaml.sh: 
 
 './local_run_json.sh -r "https://10.10.10.10/plugins'
 or 
