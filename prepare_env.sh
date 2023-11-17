@@ -47,11 +47,11 @@ cp local_run_json.sh ./$SCRIPT_PATH/
 cp local_run_yaml.sh ./$SCRIPT_PATH/
 echo "export CONTROLLER_VERSION=$CONTROLLER_VERSION" >> ./$SCRIPT_PATH/.version.sh
 
-curl -L https://jenkins-updates-cdn.cloudbees.com .com/update-center/envelope-core-mm/update-center.json?version=$CONTROLLER_VERSION -o ./$SCRIPT_PATH/update-center.json
+curl -L https://jenkins-updates-cdn.cloudbees.com/update-center/envelope-core-mm/update-center.json?version=$CONTROLLER_VERSION -o ./$SCRIPT_PATH/update-center.json
 sed -i '' -e '1 d' ./$SCRIPT_PATH/update-center.json
 sed -i '' -e '$ d' ./$SCRIPT_PATH/update-center.json
 
-curl -L https://jenkins-updates-cdn.cloudbees.com /update-center/core-mm-experimental/update-center.json?version=$CONTROLLER_VERSION -o ./$SCRIPT_PATH/update-center-experimental.json
+curl -L https://jenkins-updates-cdn.cloudbees.com/update-center/core-mm-experimental/update-center.json?version=$CONTROLLER_VERSION -o ./$SCRIPT_PATH/update-center-experimental.json
 sed -i '' -e '1 d' ./$SCRIPT_PATH/update-center-experimental.json
 sed -i '' -e '$ d' ./$SCRIPT_PATH/update-center-experimental.json
 
