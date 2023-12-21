@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-set -euo pipefail
+#set -euo pipefail
 
 show_help() {
 cat << EOF
